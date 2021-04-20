@@ -187,7 +187,7 @@ class JsonPatch {
         final value = _extractValue(patch);
         final fakePath =
             JsonPointer.join(JsonPointer.fromSegments([fakeChild]), path);
-        _addChild(fakeParent, fakePath, value, strict);
+        _addChild(fakeParent, fakePath, value);
         return fakeParent[fakeChild];
       case 'remove':
         final path = _extractPath(patch);
@@ -201,14 +201,14 @@ class JsonPatch {
         final fakePath =
             JsonPointer.join(JsonPointer.fromSegments([fakeChild]), path);
         _removeChild(fakeParent, fakePath, strict);
-        _addChild(fakeParent, fakePath, value, strict);
+        _addChild(fakeParent, fakePath, value);
         return fakeParent[fakeChild];
       case 'copy':
         final from = _extractPath(patch, 'from');
         final to = _extractPath(patch, 'to');
         final fakeTo =
             JsonPointer.join(JsonPointer.fromSegments([fakeChild]), to);
-        _addChild(fakeParent, fakeTo, from.traverse(json), strict);
+        _addChild(fakeParent, fakeTo, from.traverse(json));
         return fakeParent[fakeChild];
       case 'move':
         final from = _extractPath(patch, 'from');
@@ -219,7 +219,7 @@ class JsonPatch {
             JsonPointer.join(JsonPointer.fromSegments([fakeChild]), to);
         final value = from.traverse(json);
         _removeChild(fakeParent, fakeFrom, strict);
-        _addChild(fakeParent, fakeTo, value, strict);
+        _addChild(fakeParent, fakeTo, value);
         return fakeParent[fakeChild];
       case 'test':
         final path = _extractPath(patch);
@@ -254,17 +254,13 @@ class JsonPatch {
   }
 
   static void _addChild(
-      dynamic json, JsonPointer pointer, dynamic value, bool strict) {
+      dynamic json, JsonPointer pointer, dynamic value) {
     // Deep copy the value so patch operations don't get modified.
     value = _deepCopy(value);
 
     final parent = pointer.parent.traverse(json);
     final child = pointer.segments.last;
     if (parent is Map<String, dynamic>) {
-      if (parent.containsKey(child) && strict) {
-        throw JsonPatchError(
-            'Tried to add value that already exists. Set strict to false to allow this. $json $pointer $parent $child');
-      }
       parent[child] = value;
     } else if (parent is List) {
       if (child == '-') {

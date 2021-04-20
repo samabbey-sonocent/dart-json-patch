@@ -199,13 +199,6 @@ void main() {
     test('.apply throws at invalid operations', () {
       expect(
           () => JsonPatch.apply({
-                'a': 5
-              }, [
-                {'op': 'add', 'path': '/a', 'value': 6}
-              ]),
-          throwsA(anything));
-      expect(
-          () => JsonPatch.apply({
                 'test': 5
               }, [
                 {'op': 'replace', 'path': '/a', 'value': 6}
